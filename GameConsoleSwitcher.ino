@@ -103,7 +103,7 @@ void encoderLoop() {
 			} else {
 				Serial.println(F("back"));
 				if (gameConsoleActivePort == 1) {
-					gameConsoleActivePort = 12;
+					gameConsoleActivePort = gameConsoleListSize;
 				} else {
 					gameConsoleActivePort--;
 				}
