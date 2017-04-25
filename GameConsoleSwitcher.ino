@@ -24,30 +24,40 @@ uint8_t displayHeight = 32;
 //#define DRAW_DELAY 118
 //#define D_NUM 47
 
+// ### CONFIG Shift Register ###
+#define SHIFT_REGISTER_DS_PIN 8
+#define SHIFT_REGISTER_STCP_PIN 9
+#define SHIFT_REGISTER_SHCP_PIN 10
+//boolean shiftRegister[12];
+
 // ### CONFIG GameConsoles ###
-typedef struct
-{
+typedef struct {
 	char deviceName[14];
 	bool syncStripper;
-	int ledColorRed;
-	int ledColorGreen;
-	int ledColorBlue;
-	int ledStart;
-	int ledEnd;
+	uint8_t ledColorRed;
+	uint8_t ledColorGreen;
+	uint8_t ledColorBlue;
+	uint8_t ledStart;
+	uint8_t ledEnd;
 }  GameConsole;
-GameConsole gameConsoleList[12] = {
-	{ "NES", false, 255, 0, 0, 0, 3}, 
-	{ "SNES", true, 255, 0, 0, 4, 7},
-	{ "N64", true, 255, 0, 0, 8, 11},
-	{ "Game Cube", true, 255, 0, 0, 12, 15},
-	{ "SNES NTSC", true, 255, 0, 0, 16, 19},
-	{ "Atari", true, 0, 255, 0, 20, 23},
-	{ "Master System", true, 0, 0, 255, 24, 27},
-	{ "Mega Drive", true, 0, 0, 255, 28, 31},
-	{ "Saturn", true, 0, 0, 255, 32, 35},
-	{ "Dreamcast", true, 0, 0, 255, 36, 39},
-	{ "PlayStation 1", true, 106, 90, 205, 40, 43},
-	{ "PlayStation 2", true, 106, 90, 205, 44, 49} // only till 47 needed
+
+GameConsole gameConsoleList[16] = {
+	/* 1*/{ "NES", false, 255, 0, 0, 0, 3}, 
+	/* 2*/{ "SNES", true, 255, 0, 0, 4, 7},
+	/* 3*/{ "N64", true, 255, 0, 0, 8, 11},
+	/* 4*/{ "Game Cube", true, 255, 0, 0, 12, 15},
+	/* 5*/{ "SNES NTSC", true, 255, 0, 0, 16, 19},
+	/* 6*/{ "Atari", true, 0, 255, 0, 20, 23},
+	/* 7*/{ "Master System", true, 0, 0, 255, 24, 27},
+	/* 8*/{ "Mega Drive", true, 0, 0, 255, 28, 31},
+	/* 9*/{ "Saturn", true, 0, 0, 255, 32, 35},
+	/*10*/{ "Dreamcast", true, 0, 0, 255, 36, 39},
+	/*11*/{ "PlayStation 1", true, 106, 90, 205, 40, 43},
+	/*12*/{ "PlayStation 2", true, 106, 90, 205, 44, 49}, // only till 47 needed
+	/*13*/{ "Console 13", true, 0, 0, 0, NULL, NULL },
+	/*14*/{ "Console 14", true, 0, 0, 0, NULL, NULL },
+	/*15*/{ "Console 15", true, 0, 0, 0, NULL, NULL },
+	/*16*/{ "Console 16", true, 0, 0, 0, NULL, NULL }
 };
 
 // Global Variables
@@ -68,6 +78,7 @@ void setup() {
 	encoderSetup();
 	ledSetup();
 	displaySetup();
+	shiftRegisterSetup();
  
 	Serial.println(F("setup finished"));
 }
@@ -108,6 +119,9 @@ void encoderLoop() {
 					gameConsoleActivePort--;
 				}
 			}
+
+			shiftRegisterUpdate();
+
 			Serial.print(F("gameConsoleActivePort: "));
 			Serial.println(gameConsoleActivePort);
 
@@ -147,6 +161,10 @@ void ledSetup() {
 
 void ledUpdate() {
 	for (int i = 0; i < gameConsoleListSize; i++) {
+		if (gameConsoleList[i].ledEnd == NULL) {
+			continue;
+		}
+
 		//Serial.print("i: ");
 		//Serial.println(i);    
     
@@ -256,4 +274,30 @@ void displaySwitchSyncStripper() {
 void encoderSwitchSyncStripper() {
 	bool currentState = gameConsoleList[gameConsoleActivePort - 1].syncStripper;
 	gameConsoleList[gameConsoleActivePort - 1].syncStripper = !currentState;
+}
+
+void shiftRegisterSetup() {
+	pinMode(SHIFT_REGISTER_DS_PIN, OUTPUT);
+	pinMode(SHIFT_REGISTER_STCP_PIN, OUTPUT);
+	pinMode(SHIFT_REGISTER_SHCP_PIN, OUTPUT);	
+	shiftRegisterUpdate();
+}
+
+void shiftRegisterUpdate() {
+	digitalWrite(SHIFT_REGISTER_STCP_PIN, LOW);
+
+	Serial.print(F("ShiftRegister: "));
+	for (int i = 0;  i < gameConsoleListSize; i++) {
+		digitalWrite(SHIFT_REGISTER_SHCP_PIN, LOW);
+		//digitalWrite(SHIFT_REGISTER_DS_PIN, shiftRegister[i]);
+		bool shiftRegisterBit = false;
+		if ((i + 1) == gameConsoleActivePort) {
+			shiftRegisterBit = true;
+		}
+		Serial.print(shiftRegisterBit ? 1 : 0);
+		digitalWrite(SHIFT_REGISTER_DS_PIN, shiftRegisterBit);
+		digitalWrite(SHIFT_REGISTER_SHCP_PIN, HIGH);
+	}
+	Serial.println();
+	digitalWrite(SHIFT_REGISTER_STCP_PIN, HIGH);
 }
