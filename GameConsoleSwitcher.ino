@@ -85,7 +85,7 @@ void setup() {
 
 void loop() {
 	encoderLoop();
-	displayConsole();
+	displayGameConsole();
 }
 
 void encoderTimerIsr() {
@@ -194,7 +194,7 @@ void displaySetup() {
 	display.clearDisplay();
 }
 
-void displayConsole() {
+void displayGameConsole() {
 	display.clearDisplay();
 	display.setTextColor(WHITE);
 	display.setTextSize(1);
