@@ -13,12 +13,13 @@
 CRGB ledsDefaultColor = CRGB::White;
 
 // ### CONFIG Encoder ###
-#define ENCODER_SWITCH_PIN A2
-#define ENCODER_CLOCK_PIN A0
-#define ENCODER_DATA_PIN A1
+#define ENCODER_SWITCH_PIN A1//A2
+#define ENCODER_DATA_PIN A2 //A1
+#define ENCODER_CLOCK_PIN A3 //A0
 
 // ### CONFIG Display ###
 #define OLED_RESET 4 // not used (optional)
+
 uint8_t displayWidth = 128;
 uint8_t displayHeight = 32;
 //#define DRAW_DELAY 118
@@ -44,11 +45,11 @@ typedef struct {
 GameConsole gameConsoleList[16] = {
 	/* 1*/{ "NES", false, 255, 0, 0, 0, 3}, 
 	/* 2*/{ "SNES", true, 255, 0, 0, 4, 7},
-	/* 3*/{ "N64", true, 255, 0, 0, 8, 11},
+	/* 3*/{ "N64", false, 255, 0, 0, 8, 11},
 	/* 4*/{ "Game Cube", true, 255, 0, 0, 12, 15},
 	/* 5*/{ "SNES NTSC", true, 255, 0, 0, 16, 19},
 	/* 6*/{ "Atari", true, 0, 255, 0, 20, 23},
-	/* 7*/{ "Master System", true, 0, 0, 255, 24, 27},
+	/* 7*/{ "Master System", false, 0, 0, 255, 24, 27},
 	/* 8*/{ "Mega Drive", true, 0, 0, 255, 28, 31},
 	/* 9*/{ "Saturn", true, 0, 0, 255, 32, 35},
 	/*10*/{ "Dreamcast", true, 0, 0, 255, 36, 39},
@@ -67,6 +68,7 @@ int16_t encoderLastValue, encoderCurrentValue;
 uint8_t gameConsoleActivePort;
 uint8_t gameConsoleListSize;
 Adafruit_SSD1306 display(OLED_RESET);
+//Adafruit_SSD1306 display(OLED_DC, OLED_RESET, OLED_CS);
 
 void setup() {
 	Serial.begin(115200);
@@ -287,17 +289,35 @@ void shiftRegisterUpdate() {
 	digitalWrite(SHIFT_REGISTER_STCP_PIN, LOW);
 
 	Serial.print(F("ShiftRegister: "));
+
+	// Write Relais Shift Register
+	// Fill unused ports
+	for (int j = 1; j < 8; j++) {
+		digitalWrite(SHIFT_REGISTER_SHCP_PIN, LOW);
+		digitalWrite(SHIFT_REGISTER_DS_PIN, false);
+		digitalWrite(SHIFT_REGISTER_SHCP_PIN, HIGH);
+		Serial.print(0);
+	}
+
+	// Sync Stripper
+	digitalWrite(SHIFT_REGISTER_SHCP_PIN, LOW);
+	digitalWrite(SHIFT_REGISTER_DS_PIN, gameConsoleList[gameConsoleActivePort - 1].syncStripper);
+	digitalWrite(SHIFT_REGISTER_SHCP_PIN, HIGH);
+	Serial.print(gameConsoleList[gameConsoleActivePort - 1].syncStripper ? 1 : 0);
+	
+	Serial.print(F("-"));
+
 	for (int i = 0;  i < gameConsoleListSize; i++) {
 		digitalWrite(SHIFT_REGISTER_SHCP_PIN, LOW);
-		//digitalWrite(SHIFT_REGISTER_DS_PIN, shiftRegister[i]);
-		bool shiftRegisterBit = false;
+		bool shiftRegisterBit = true;
 		if ((i + 1) == gameConsoleActivePort) {
-			shiftRegisterBit = true;
+			shiftRegisterBit = false;
 		}
-		Serial.print(shiftRegisterBit ? 1 : 0);
+		Serial.print(shiftRegisterBit);
 		digitalWrite(SHIFT_REGISTER_DS_PIN, shiftRegisterBit);
 		digitalWrite(SHIFT_REGISTER_SHCP_PIN, HIGH);
 	}
+	
 	Serial.println();
 	digitalWrite(SHIFT_REGISTER_STCP_PIN, HIGH);
 }
