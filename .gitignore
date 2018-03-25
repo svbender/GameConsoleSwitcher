@@ -1,0 +1,6 @@
+# Visual Studio files
+*.vs
+Debug/*
+*.vcxproj*
+__vm/*
+
