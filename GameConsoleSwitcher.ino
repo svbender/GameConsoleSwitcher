@@ -8,12 +8,12 @@
 #include <Adafruit_SSD1306.h>
 
 // ### CONFIG LED ###
-#define LED_NUMBER 50 // Total number of LED
+#define LED_NUMBER 48 // Total number of LED
 #define LED_DATA_PIN 6 // Data pin that led data will be written out over
 CRGB ledsDefaultColor = CRGB::White;
 
 // ### CONFIG Encoder ###
-#define ENCODER_SWITCH_PIN A1//A2
+#define ENCODER_SWITCH_PIN A1 //A2
 #define ENCODER_DATA_PIN A2 //A1
 #define ENCODER_CLOCK_PIN A3 //A0
 
@@ -43,22 +43,22 @@ typedef struct {
 }  GameConsole;
 
 GameConsole gameConsoleList[16] = {
-	/* 1*/{ "NES", false, 255, 0, 0, 0, 3}, 
-	/* 2*/{ "SNES", true, 255, 0, 0, 4, 7},
-	/* 3*/{ "N64", false, 255, 0, 0, 8, 11},
-	/* 4*/{ "Game Cube", true, 255, 0, 0, 12, 15},
-	/* 5*/{ "SNES NTSC", true, 255, 0, 0, 16, 19},
-	/* 6*/{ "Atari", true, 0, 255, 0, 20, 23},
-	/* 7*/{ "Master System", false, 0, 0, 255, 24, 27},
-	/* 8*/{ "Mega Drive", true, 0, 0, 255, 28, 31},
-	/* 9*/{ "Saturn", true, 0, 0, 255, 32, 35},
-	/*10*/{ "Dreamcast", true, 0, 0, 255, 36, 39},
-	/*11*/{ "PlayStation 1", true, 106, 90, 205, 40, 43},
-	/*12*/{ "PlayStation 2", true, 106, 90, 205, 44, 49}, // only till 47 needed
-	/*13*/{ "Console 13", true, 0, 0, 0, NULL, NULL },
-	/*14*/{ "Console 14", true, 0, 0, 0, NULL, NULL },
-	/*15*/{ "Console 15", true, 0, 0, 0, NULL, NULL },
-	/*16*/{ "Console 16", true, 0, 0, 0, NULL, NULL }
+/* 1*/{"NES", false, 255, 0, 0, 0, 3}, 
+/* 2*/{"SNES", true, 255, 0, 0, 4, 7},
+/* 3*/{"N64", false, 255, 0, 0, 8, 11},
+/* 4*/{"Game Cube", true, 255, 0, 0, 12, 15},
+/* 5*/{"SNES NTSC", true, 255, 0, 0, 16, 19},
+/* 6*/{"Atari", true, 0, 255, 0, 20, 23},
+/* 7*/{"Master System", false, 0, 0, 255, 24, 27},
+/* 8*/{"Mega Drive", true, 0, 0, 255, 28, 31},
+/* 9*/{"Saturn", true, 0, 0, 255, 32, 35},
+/*10*/{"Dreamcast", true, 0, 0, 255, 36, 39},
+/*11*/{"PlayStation 1", true, 106, 90, 205, 40, 43},
+/*12*/{"PlayStation 2", true, 106, 90, 205, 44, 47},
+/*13*/{"Console 13", true, 0, 0, 0, NULL, NULL},
+/*14*/{"Console 14", true, 0, 0, 0, NULL, NULL},
+/*15*/{"Console 15", true, 0, 0, 0, NULL, NULL},
+/*16*/{"Console 16", true, 0, 0, 0, NULL, NULL}
 };
 
 // Global Variables
@@ -276,6 +276,7 @@ void displaySwitchSyncStripper() {
 void encoderSwitchSyncStripper() {
 	bool currentState = gameConsoleList[gameConsoleActivePort - 1].syncStripper;
 	gameConsoleList[gameConsoleActivePort - 1].syncStripper = !currentState;
+	shiftRegisterUpdate();
 }
 
 void shiftRegisterSetup() {
@@ -307,7 +308,7 @@ void shiftRegisterUpdate() {
 	
 	Serial.print(F("-"));
 
-	for (int i = 0;  i < gameConsoleListSize; i++) {
+	for (int i = 0; i < gameConsoleListSize; i++) {
 		digitalWrite(SHIFT_REGISTER_SHCP_PIN, LOW);
 		bool shiftRegisterBit = true;
 		if ((i + 1) == gameConsoleActivePort) {
