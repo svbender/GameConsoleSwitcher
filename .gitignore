@@ -1,6 +1,4 @@
-# Visual Studio files
-*.vs
-Debug/*
-*.vcxproj*
-__vm/*
-
+.pio
+.pioenvs
+.piolibdeps
+.vscode
